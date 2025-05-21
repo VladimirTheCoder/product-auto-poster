@@ -42,7 +42,7 @@ async def is_admin(user_id):
 # === Форматирование цены ===
 def format_price(price):
     try:
-        price = int(float(price))
+        price = int(float(price))  # Поддерживает float, например 2000000.0
         return f"{price:,.0f}".replace(',', ' ')
     except:
         return "0"
@@ -74,7 +74,7 @@ async def send_product(product):
             chat_id=CHANNEL_NAME,
             text=message_text,
             reply_markup=keyboard,
-            parse_mode=None  # ← Полностью отключен Markdown
+            parse_mode=None
         )
         return True
     except Exception as e:
@@ -142,13 +142,12 @@ async def main():
         format="%(asctime)s - %(levelname)s - %(message)s",
     )
 
-    try:
-        logging.info("🚀 Бот запущен")
-        await dp.start_polling(bot)
-    except Exception as e:
-        logging.error(f"Ошибка: {e}")
-    finally:
-        await bot.session.close()
+    # Удаляем возможный вебхук перед стартом
+    await bot.delete_webhook()
+    logging.info("🧹 Вебхук удален")
+
+    logging.info("🚀 Бот запущен")
+    await dp.start_polling(bot)
 
 if __name__ == '__main__':
     print("Товаров загружено:", len(PRODUCTS))
@@ -156,4 +155,5 @@ if __name__ == '__main__':
         print("Первый товар:", PRODUCTS[0])
     else:
         print("Файл products.json либо пуст, либо повреждён.")
+    
     asyncio.run(main())
